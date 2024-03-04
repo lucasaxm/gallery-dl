@@ -340,10 +340,12 @@ class RedditAPI():
             self.headers = {"User-Agent": config("user-agent")}
 
         if self.client_id == self.CLIENT_ID:
+            self.client_secret = ""
             client_id = self.client_id
             self._warn_429 = True
             kind = "default"
         else:
+            self.client_secret = config("client-secret")
             client_id = client_id[:5] + "*" * (len(client_id)-5)
             self._warn_429 = False
             kind = "custom"
@@ -423,7 +425,7 @@ class RedditAPI():
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
 
-        auth = util.HTTPBasicAuth(self.client_id, "")
+        auth = util.HTTPBasicAuth(self.client_id, self.client_secret)
         response = self.extractor.request(
             url, method="POST", headers=self.headers,
             data=data, auth=auth, fatal=False)
