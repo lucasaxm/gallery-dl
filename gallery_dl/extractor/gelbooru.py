@@ -32,6 +32,9 @@ class GelbooruBase():
         url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
+        if not key:
+            return data
+
         try:
             posts = data[key]
         except KeyError:
@@ -167,13 +170,61 @@ class GelbooruFavoriteExtractor(GelbooruBase,
         params = {
             "s"    : "favorite",
             "id"   : self.favorite_id,
-            "limit": "1",
+            "limit": "2",
         }
+        data = self._api_request(params, None, True)
 
-        count = self._api_request(params, "@attributes", True)[0]["count"]
-        if count <= self.offset:
-            return
+        count = data["@attributes"]["count"]
+        self.log.debug("API reports %s favorite entries", count)
 
+        favs = data["favorite"]
+        try:
+            order = 1 if favs[0]["id"] < favs[1]["id"] else -1
+        except LookupError as exc:
+            self.log.debug(
+                "Error when determining API favorite order (%s: %s)",
+                exc.__class__.__name__, exc)
+            order = -1
+        else:
+            self.log.debug("API yields favorites in %sscending order",
+                           "a" if order > 0 else "de")
+
+        order_favs = self.config("order-posts")
+        if order_favs and order_favs[0] in ("r", "a"):
+            self.log.debug("Returning them in reverse")
+            order = -order
+
+        if order < 0:
+            return self._pagination(params, count)
+        return self._pagination_reverse(params, count)
+
+    def _pagination(self, params, count):
+        if self.offset:
+            pnum, skip = divmod(self.offset, self.per_page)
+        else:
+            pnum = skip = 0
+
+        params["pid"] = pnum
+        params["limit"] = self.per_page
+
+        while True:
+            favs = self._api_request(params, "favorite")
+
+            if not favs:
+                return
+
+            if skip:
+                favs = favs[skip:]
+                skip = 0
+
+            for fav in favs:
+                for post in self._api_request({"id": fav["favorite"]}):
+                    post["date_favorited"] = text.parse_timestamp(fav["added"])
+                    yield post
+
+            params["pid"] += 1
+
+    def _pagination_reverse(self, params, count):
         pnum, last = divmod(count-1, self.per_page)
         if self.offset > last:
             # page number change
@@ -182,12 +233,11 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             pnum -= diff + 1
         skip = self.offset
 
-        # paginate over them in reverse
         params["pid"] = pnum
         params["limit"] = self.per_page
 
         while True:
-            favs = self._api_request(params, "favorite", True)
+            favs = self._api_request(params, "favorite")
             favs.reverse()
 
             if skip:
@@ -195,7 +245,9 @@ class GelbooruFavoriteExtractor(GelbooruBase,
                 skip = 0
 
             for fav in favs:
-                yield from self._api_request({"id": fav["favorite"]})
+                for post in self._api_request({"id": fav["favorite"]}):
+                    post["date_favorited"] = text.parse_timestamp(fav["added"])
+                    yield post
 
             params["pid"] -= 1
             if params["pid"] < 0:

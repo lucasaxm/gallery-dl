@@ -191,6 +191,8 @@ class RedditExtractor(Extractor):
         try:
             if "reddit_video_preview" in post["preview"]:
                 video = post["preview"]["reddit_video_preview"]
+                if "fallback_url" in video:
+                    yield video["fallback_url"]
                 if "dash_url" in video:
                     yield "ytdl:" + video["dash_url"]
                 if "hls_url" in video:
@@ -200,6 +202,12 @@ class RedditExtractor(Extractor):
 
         try:
             for image in post["preview"]["images"]:
+                variants = image.get("variants")
+                if variants:
+                    if "gif" in variants:
+                        yield variants["gif"]["source"]["url"]
+                    if "mp4" in variants:
+                        yield variants["mp4"]["source"]["url"]
                 yield image["source"]["url"]
         except Exception as exc:
             self.log.debug("%s: %s", exc.__class__.__name__, exc)

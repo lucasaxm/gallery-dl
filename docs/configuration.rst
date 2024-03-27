@@ -1872,6 +1872,20 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.contexts
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, return the albums and pools it belongs to
+    as ``set`` and ``pool`` metadata.
+
+    Note: This requires 1 additional API call per photo.
+    See `flickr.photos.getAllContexts <https://www.flickr.com/services/api/flickr.photos.getAllContexts.html>`__ for details.
+
+
 extractor.flickr.exif
 ---------------------
 Type
@@ -1879,9 +1893,11 @@ Type
 Default
     ``false``
 Description
-    Fetch `exif` and `camera` metadata for each photo.
+    For each photo, return its EXIF/TIFF/GPS tags
+    as ``exif`` and ``camera`` metadata.
 
     Note: This requires 1 additional API call per photo.
+    See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
 extractor.flickr.metadata
@@ -1901,7 +1917,7 @@ Description
 
     It is possible to specify a custom list of metadata includes.
     See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
-    in `Flickr API docs <https://www.flickr.com/services/api/>`__
+    in `Flickr's API docs <https://www.flickr.com/services/api/>`__
     for possible field names.
 
 
@@ -1999,6 +2015,20 @@ Description
     Values from the API Access Credentials section found at the bottom of your
     `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
     page.
+
+
+extractor.gelbooru.favorite.order-posts
+---------------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which favorited posts are returned.
+
+    * ``"asc"``: Ascending favorite date order (oldest first)
+    * ``"desc"``: Descending favorite date order (newest first)
+    * ``"reverse"``: Same as ``"asc"``
 
 
 extractor.generic.enabled
@@ -2287,6 +2317,16 @@ Description
     Extract a user's direct messages as ``dms`` metadata.
 
 
+extractor.kemonoparty.announcements
+-----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract a user's announcements as ``announcements`` metadata.
+
+
 extractor.kemonoparty.favorites
 -------------------------------
 Type
@@ -2344,6 +2384,22 @@ Description
     Set this to ``"unique"`` to filter out duplicate revisions.
 
     Note: This requires 1 additional HTTP request per post.
+
+
+extractor.kemonoparty.order-revisions
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    `revisions <extractor.kemonoparty.revisions_>`__
+    are returned.
+
+    * ``"asc"``: Ascending order (oldest first)
+    * ``"desc"``: Descending order (newest first)
+    * ``"reverse"``: Same as ``"asc"``
 
 
 extractor.khinsider.format
@@ -3286,7 +3342,7 @@ Examples
     * ``["jpeg", "webp"]``
 Description
     Only include assets that are in the specified file types. ``all`` can be
-    used to specifiy all file types. Valid values are:
+    used to specify all file types. Valid values are:
 
     * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
     * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
@@ -3326,7 +3382,7 @@ Examples
     * ``["fr", "it"]``
 Description
     Only include assets that are in the specified languages. ``all`` can be
-    used to specifiy all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    used to specify all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
     language codes.
 
 
@@ -3771,6 +3827,19 @@ Description
     * ``"wait"``: Wait until rate limit reset
 
 
+extractor.twitter.locked
+------------------------
+Type
+    ``string``
+Default
+    ``"abort"``
+Description
+    Selects how to handle "account is temporarily locked" errors.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until the account is unlocked and retry
+
+
 extractor.twitter.replies
 -------------------------
 Type
@@ -3909,6 +3978,31 @@ Description
     ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
 
 
+extractor.vipergirls.domain
+---------------------------
+Type
+    ``string``
+Default
+    ``"vipergirls.to"``
+Description
+    Specifies the domain used by ``vipergirls`` extractors.
+
+    For example ``"viper.click"`` if the main domain is blocked or to bypass Cloudflare,
+
+
+extractor.vipergirls.like
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically `like` posts after downloading their images.
+
+    Note: Requires `login <extractor.*.username & .password_>`__
+    or `cookies <extractor.*.cookies_>`__
+
+
 extractor.vsco.videos
 ---------------------
 Type
@@ -4039,7 +4133,7 @@ extractor.weibo.retweets
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Fetch media from retweeted posts.
 
@@ -5784,7 +5878,7 @@ How To
       * choose a name
       * select "installed app"
       * set ``http://localhost:6414/`` as "redirect uri"
-      * solve the "I'm not a rebot" reCATCHA if needed
+      * solve the "I'm not a robot" reCAPTCHA if needed
       * click "create app"
 
     * copy the client id (third line, under your application's name and
