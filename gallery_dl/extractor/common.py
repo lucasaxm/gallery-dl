@@ -14,6 +14,7 @@ import ssl
 import time
 import netrc
 import queue
+import getpass
 import logging
 import datetime
 import requests
@@ -45,6 +46,8 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
+        self.match = match
+        self.groups = match.groups()
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -174,9 +177,10 @@ class Extractor():
                 code = response.status_code
                 if self._write_pages:
                     self._dump_response(response)
-                if 200 <= code < 400 or fatal is None and \
-                        (400 <= code < 500) or not fatal and \
-                        (400 <= code < 429 or 431 <= code < 500):
+                if (
+                    code < 400 or
+                    code < 500 and (not fatal and code != 429 or fatal is None)
+                ):
                     if encoding:
                         response.encoding = encoding
                     return response
@@ -194,7 +198,10 @@ class Extractor():
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
-                if code not in retry_codes and code < 500:
+
+                if code == 429 and self._interval_429:
+                    pass
+                elif code not in retry_codes and code < 500:
                     break
 
             finally:
@@ -204,20 +211,24 @@ class Extractor():
             if tries > retries:
                 break
 
+            seconds = tries
             if self._interval:
-                seconds = self._interval()
-                if seconds < tries:
-                    seconds = tries
+                s = self._interval()
+                if seconds < s:
+                    seconds = s
+            if code == 429 and self._interval_429:
+                s = self._interval_429()
+                if seconds < s:
+                    seconds = s
+                self.wait(seconds=seconds, reason="429 Too Many Requests")
             else:
-                seconds = tries
-
-            self.sleep(seconds, "retry")
+                self.sleep(seconds, "retry")
             tries += 1
 
         raise exception.HttpError(msg, response)
 
     def wait(self, seconds=None, until=None, adjust=1.0,
-             reason="rate limit reset"):
+             reason="rate limit"):
         now = time.time()
 
         if seconds:
@@ -240,13 +251,22 @@ class Extractor():
         if reason:
             t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
-            self.log.info("Waiting until %s for %s.", isotime, reason)
+            self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
 
     def sleep(self, seconds, reason):
         self.log.debug("Sleeping %.2f seconds (%s)",
                        seconds, reason)
         time.sleep(seconds)
+
+    def input(self, prompt, echo=True):
+        if echo:
+            try:
+                return input(prompt)
+            except (EOFError, OSError):
+                return None
+        else:
+            return getpass.getpass(prompt)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
@@ -279,6 +299,9 @@ class Extractor():
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
             self.request_interval_min,
+        )
+        self._interval_429 = util.build_duration_func(
+            self.config("sleep-429", 60),
         )
 
         if self._retries < 0:
@@ -439,9 +462,11 @@ class Extractor():
             if not path:
                 return
 
+        path_tmp = path + ".tmp"
         try:
-            with open(path, "w") as fp:
+            with open(path_tmp, "w") as fp:
                 util.cookiestxt_store(fp, self.cookies)
+            os.replace(path_tmp, path)
         except OSError as exc:
             self.log.warning("cookies: %s", exc)
 
@@ -599,7 +624,7 @@ class GalleryExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.gallery_url = self.root + match.group(1) if url is None else url
+        self.gallery_url = self.root + self.groups[0] if url is None else url
 
     def items(self):
         self.login()
@@ -674,7 +699,7 @@ class MangaExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.manga_url = url or self.root + match.group(1)
+        self.manga_url = self.root + self.groups[0] if url is None else url
 
         if self.config("chapter-reverse", False):
             self.reverse = not self.reverse
@@ -736,17 +761,17 @@ class BaseExtractor(Extractor):
     instances = ()
 
     def __init__(self, match):
-        if not self.category:
-            self._init_category(match)
         Extractor.__init__(self, match)
+        if not self.category:
+            self._init_category()
 
-    def _init_category(self, match):
-        for index, group in enumerate(match.groups()):
+    def _init_category(self):
+        for index, group in enumerate(self.groups):
             if group is not None:
                 if index:
                     self.category, self.root, info = self.instances[index-1]
                     if not self.root:
-                        self.root = text.root_from_url(match.group(0))
+                        self.root = text.root_from_url(self.match.group(0))
                     self.config_instance = info.get
                 else:
                     self.root = group
