@@ -346,14 +346,13 @@ class RedditRedirectExtractor(Extractor):
         Extractor.__init__(self, match)
         self.subreddit = match.group(1)
         self.share_url = match.group(2)
+        self.api = RedditAPI(self)
 
     def items(self):
         url = "https://www.reddit.com/r/" + self.subreddit + "/s/" + \
               self.share_url
         data = {"_extractor": RedditSubmissionExtractor}
-        response = self.request(url, method="HEAD", allow_redirects=False,
-                                notfound="submission")
-        yield Message.Queue, response.headers["Location"], data
+        yield Message.Queue, self.api.redirect(url), data
 
 
 class RedditAPI():
@@ -401,12 +400,6 @@ class RedditAPI():
         else:
             self.refresh_token = token
 
-        if not self.refresh_token:
-            # allow downloading from quarantined subreddits (#2180)
-            extractor.cookies.set(
-                "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
-                domain=extractor.cookies_domain)
-
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
         endpoint = "/comments/" + submission_id + "/.json"
@@ -445,6 +438,14 @@ class RedditAPI():
                 else:
                     yield thing["data"]
 
+    def redirect(self, url):
+        """Handle the request for the RedditRedirectExtractor"""
+        self.authenticate()
+        response = self.extractor.request(
+            url, method="HEAD", allow_redirects=False,
+            notfound="submission", headers=self.headers)
+        return response.headers["Location"]
+
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
         self.headers["Authorization"] = \
@@ -453,32 +454,30 @@ class RedditAPI():
     @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
-        self.log.debug("Using Basic auth: %s", data)
-        return "Basic  " + util.HTTPBasicAuth(self.client_id, self.client_secret)
-        # url = "https://www.reddit.com/api/v1/access_token"
-        # self.headers["Authorization"] = None
+        url = "https://www.reddit.com/api/v1/access_token"
+        self.headers["Authorization"] = None
 
-        # if refresh_token:
-        #     self.log.info("Refreshing private access token")
-        #     data = {"grant_type": "refresh_token",
-        #             "refresh_token": refresh_token}
-        # else:
-        #     self.log.info("Requesting public access token")
-        #     data = {"grant_type": ("https://oauth.reddit.com/"
-        #                            "grants/installed_client"),
-        #             "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
+        if refresh_token:
+            self.log.info("Refreshing private access token")
+            data = {"grant_type": "refresh_token",
+                    "refresh_token": refresh_token}
+        else:
+            self.log.info("Requesting public access token")
+            data = {"grant_type": ("https://oauth.reddit.com/"
+                                   "grants/installed_client"),
+                    "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
 
-        # auth = util.HTTPBasicAuth(self.client_id, self.client_secret)
-        # response = self.extractor.request(
-        #     url, method="POST", headers=self.headers,
-        #     data=data, auth=auth, fatal=False)
-        # data = response.json()
+        auth = util.HTTPBasicAuth(self.client_id, self.client_secret)
+        response = self.extractor.request(
+            url, method="POST", headers=self.headers,
+            data=data, auth=auth, fatal=False)
+        data = response.json()
 
-        # if response.status_code != 200:
-        #     self.log.debug("Server response: %s", data)
-        #     raise exception.AuthenticationError('"{}: {}"'.format(
-        #         data.get("error"), data.get("message")))
-        # return "Bearer " + data["access_token"]
+        if response.status_code != 200:
+            self.log.debug("Server response: %s", data)
+            raise exception.AuthenticationError('"{}: {}"'.format(
+                data.get("error"), data.get("message")))
+        return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
