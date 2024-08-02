@@ -25,7 +25,7 @@ from . import aes, text, util
 
 
 SUPPORTED_BROWSERS_CHROMIUM = {
-    "brave", "chrome", "chromium", "edge", "opera", "vivaldi"}
+    "brave", "chrome", "chromium", "edge", "opera", "thorium", "vivaldi"}
 SUPPORTED_BROWSERS = SUPPORTED_BROWSERS_CHROMIUM | {"firefox", "safari"}
 
 logger = logging.getLogger("cookies")
@@ -146,7 +146,8 @@ def load_cookies_chrome(cookiejar, browser_name, profile=None,
             set_cookie(Cookie(
                 0, name, value, None, False,
                 domain, bool(domain), domain.startswith("."),
-                path, bool(path), secure, expires, False, None, None, {},
+                path, bool(path), secure, expires or None, False,
+                None, None, {},
             ))
 
     if failed_cookies > 0:
@@ -187,8 +188,8 @@ def _firefox_cookies_database(profile=None, container=None):
             os.path.dirname(path), "containers.json")
 
         try:
-            with open(containers_path) as file:
-                identities = util.json_loads(file.read())["identities"]
+            with open(containers_path) as fp:
+                identities = util.json_loads(fp.read())["identities"]
         except OSError:
             _log_error("Unable to read Firefox container database at '%s'",
                        containers_path)
@@ -353,6 +354,7 @@ def _get_chromium_based_browser_settings(browser_name):
             "chromium": join(appdata_local, R"Chromium\User Data"),
             "edge"    : join(appdata_local, R"Microsoft\Edge\User Data"),
             "opera"   : join(appdata_roaming, R"Opera Software\Opera Stable"),
+            "thorium" : join(appdata_local, R"Thorium\User Data"),
             "vivaldi" : join(appdata_local, R"Vivaldi\User Data"),
         }[browser_name]
 
@@ -364,6 +366,7 @@ def _get_chromium_based_browser_settings(browser_name):
             "chromium": join(appdata, "Chromium"),
             "edge"    : join(appdata, "Microsoft Edge"),
             "opera"   : join(appdata, "com.operasoftware.Opera"),
+            "thorium" : join(appdata, "Thorium"),
             "vivaldi" : join(appdata, "Vivaldi"),
         }[browser_name]
 
@@ -376,6 +379,7 @@ def _get_chromium_based_browser_settings(browser_name):
             "chromium": join(config, "chromium"),
             "edge"    : join(config, "microsoft-edge"),
             "opera"   : join(config, "opera"),
+            "thorium" : join(config, "Thorium"),
             "vivaldi" : join(config, "vivaldi"),
         }[browser_name]
 
@@ -389,6 +393,7 @@ def _get_chromium_based_browser_settings(browser_name):
         "edge"    : "Microsoft Edge" if sys.platform == "darwin" else
                     "Chromium",
         "opera"   : "Opera" if sys.platform == "darwin" else "Chromium",
+        "thorium" : "Thorium",
         "vivaldi" : "Vivaldi" if sys.platform == "darwin" else "Chrome",
     }[browser_name]
 
@@ -744,8 +749,8 @@ def _get_windows_v10_key(browser_root):
         _log_error("Unable to find Local State file")
         return None
     _log_debug("Found Local State file at '%s'", path)
-    with open(path, encoding="utf-8") as file:
-        data = util.json_loads(file.read())
+    with open(path, encoding="utf-8") as fp:
+        data = util.json_loads(fp.read())
     try:
         base64_key = data["os_crypt"]["encrypted_key"]
     except KeyError:
@@ -1001,6 +1006,12 @@ def _decrypt_windows_dpapi(ciphertext):
 
 
 def _find_most_recently_used_file(root, filename):
+    # if the provided root points to an exact profile path
+    # check if it contains the wanted filename
+    first_choice = os.path.join(root, filename)
+    if os.path.exists(first_choice):
+        return first_choice
+
     # if there are multiple browser profiles, take the most recently used one
     paths = []
     for curr_root, dirs, files in os.walk(root):

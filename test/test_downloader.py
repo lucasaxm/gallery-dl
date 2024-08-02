@@ -136,8 +136,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         if content:
             mode = "w" + ("b" if isinstance(content, bytes) else "")
-            with pathfmt.open(mode) as file:
-                file.write(content)
+            with pathfmt.open(mode) as fp:
+                fp.write(content)
 
         return pathfmt
 
@@ -151,8 +151,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         # test content
         mode = "r" + ("b" if isinstance(output, bytes) else "")
-        with pathfmt.open(mode) as file:
-            content = file.read()
+        with pathfmt.open(mode) as fp:
+            content = fp.read()
         self.assertEqual(content, output)
 
         # test filename extension
@@ -174,9 +174,17 @@ class TestHTTPDownloader(TestDownloaderBase):
         TestDownloaderBase.setUpClass()
         cls.downloader = downloader.find("http")(cls.job)
 
-        port = 8088
-        cls.address = "http://127.0.0.1:{}".format(port)
-        server = http.server.HTTPServer(("", port), HttpRequestHandler)
+        host = "127.0.0.1"
+        port = 0  # select random not-in-use port
+
+        try:
+            server = http.server.HTTPServer((host, port), HttpRequestHandler)
+        except OSError as exc:
+            raise unittest.SkipTest(
+                "cannot spawn local HTTP server ({})".format(exc))
+
+        host, port = server.server_address
+        cls.address = "http://{}:{}".format(host, port)
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
     def _run_test(self, ext, input, output,
@@ -303,7 +311,7 @@ SAMPLES = {
     ("mp4" , b"????ftypmp4"),
     ("mp4" , b"????ftypavc1"),
     ("mp4" , b"????ftypiso3"),
-    ("mp4" , b"????ftypM4V"),
+    ("m4v" , b"????ftypM4V"),
     ("mov" , b"????ftypqt  "),
     ("webm", b"\x1A\x45\xDF\xA3"),
     ("ogg" , b"OggS"),

@@ -16,7 +16,6 @@ import time
 import random
 import getpass
 import hashlib
-import sqlite3
 import binascii
 import datetime
 import functools
@@ -107,12 +106,12 @@ def identity(x):
     return x
 
 
-def true(_):
+def true(_, __=None):
     """Always returns True"""
     return True
 
 
-def false(_):
+def false(_, __=None):
     """Always returns False"""
     return False
 
@@ -541,8 +540,23 @@ class CustomNone():
     def __bool__():
         return False
 
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    __lt__ = true
+    __le__ = true
+    __gt__ = false
+    __ge__ = false
+
     @staticmethod
     def __len__():
+        return 0
+
+    @staticmethod
+    def __hash__():
         return 0
 
     @staticmethod
@@ -606,9 +620,26 @@ else:
     Popen = subprocess.Popen
 
 
-def compile_expression(expr, name="<expr>", globals=None):
+def compile_expression_raw(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
     return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def compile_expression_tryexcept(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+
+    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+        try:
+            return eval(co, globals, locals)
+        except exception.GalleryDLException:
+            raise
+        except Exception:
+            return False
+
+    return _eval
+
+
+compile_expression = compile_expression_tryexcept
 
 
 def import_file(path):
@@ -852,46 +883,3 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
-
-
-class DownloadArchive():
-
-    def __init__(self, path, format_string, pragma=None,
-                 cache_key="_archive_key"):
-        try:
-            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
-        except sqlite3.OperationalError:
-            os.makedirs(os.path.dirname(path))
-            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
-        con.isolation_level = None
-
-        from . import formatter
-        self.keygen = formatter.parse(format_string).format_map
-        self.close = con.close
-        self.cursor = cursor = con.cursor()
-        self._cache_key = cache_key
-
-        if pragma:
-            for stmt in pragma:
-                cursor.execute("PRAGMA " + stmt)
-
-        try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
-        except sqlite3.OperationalError:
-            # fallback for missing WITHOUT ROWID support (#553)
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY)")
-
-    def check(self, kwdict):
-        """Return True if the item described by 'kwdict' exists in archive"""
-        key = kwdict[self._cache_key] = self.keygen(kwdict)
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
-        return self.cursor.fetchone()
-
-    def add(self, kwdict):
-        """Add item described by 'kwdict' to archive"""
-        key = kwdict.get(self._cache_key) or self.keygen(kwdict)
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))

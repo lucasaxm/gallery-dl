@@ -14,7 +14,7 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://twitter\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
+    "#pattern" : r"https://x\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
     "#count"   : 7,
 },
 
@@ -56,6 +56,12 @@ __tests__ = (
 
 {
     "#url"     : "https://fixupx.com/supernaturepics",
+    "#category": ("", "twitter", "user"),
+    "#class"   : twitter.TwitterUserExtractor,
+},
+
+{
+    "#url"     : "https://fixvx.com/supernaturepics",
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
 },
@@ -271,7 +277,7 @@ __tests__ = (
     "#category": ("", "twitter", "hashtag"),
     "#class"   : twitter.TwitterHashtagExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=%23nature",
+    "#urls"    : "https://x.com/search?q=%23nature",
 },
 
 {
@@ -534,6 +540,13 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
 },
 
 {
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824/video/1",
+    "#comment" : "/video/ URL",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/morino_ya/status/1392763691599237121",
     "#comment" : "retweet with missing media entities (#1555)",
     "#category": ("", "twitter", "tweet"),
@@ -609,11 +622,25 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
 },
 
 {
+    "#url"     : "https://x.com/jsports_motor/status/1801338077618524583",
+    "#comment" : "geo-restricted video (#5736)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/quotes",
     "#category": ("", "twitter", "quotes"),
     "#class"   : twitter.TwitterQuotesExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=quoted_tweet_id:1263832915173048321",
+    "#urls"    : "https://x.com/search?q=quoted_tweet_id:1263832915173048321",
+},
+
+{
+    "#url"     : "https://twitter.com/supernaturepics/info",
+    "#category": ("", "twitter", "info"),
+    "#class"   : twitter.TwitterInfoExtractor,
 },
 
 {

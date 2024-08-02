@@ -10,10 +10,14 @@ import os
 import sys
 import shutil
 import logging
-import functools
 import unicodedata
 from . import config, util, formatter
 
+
+# --------------------------------------------------------------------
+# Globals
+
+COLORS = not os.environ.get("NO_COLOR")
 COLORS_DEFAULT = {
     "success": "1;32",
     "skip"   : "2",
@@ -21,7 +25,20 @@ COLORS_DEFAULT = {
     "info"   : "1;37",
     "warning": "1;33",
     "error"  : "1;31",
-}
+} if COLORS else {}
+
+if util.WINDOWS:
+    ANSI = COLORS and os.environ.get("TERM") == "ANSI"
+    OFFSET = 1
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "* "
+    CHAR_ELLIPSIES = "..."
+else:
+    ANSI = COLORS
+    OFFSET = 0
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "✔ "
+    CHAR_ELLIPSIES = "…"
 
 
 # --------------------------------------------------------------------
@@ -72,38 +89,6 @@ class LoggerAdapter():
         if self.logger.isEnabledFor(logging.ERROR):
             kwargs["extra"] = self.extra
             self.logger._log(logging.ERROR, msg, args, **kwargs)
-
-
-class LoggerAdapterActions():
-
-    def __init__(self, logger, job):
-        self.logger = logger
-        self.extra = job._logger_extra
-        self.actions = job._logger_actions
-
-        self.debug = functools.partial(self.log, logging.DEBUG)
-        self.info = functools.partial(self.log, logging.INFO)
-        self.warning = functools.partial(self.log, logging.WARNING)
-        self.error = functools.partial(self.log, logging.ERROR)
-
-    def log(self, level, msg, *args, **kwargs):
-        if args:
-            msg = msg % args
-
-        actions = self.actions[level]
-        if actions:
-            args = self.extra.copy()
-            args["level"] = level
-
-            for cond, action in actions:
-                if cond(msg):
-                    action(args)
-
-            level = args["level"]
-
-        if self.logger.isEnabledFor(level):
-            kwargs["extra"] = self.extra
-            self.logger._log(level, msg, (), **kwargs)
 
 
 class PathfmtProxy():
@@ -550,17 +535,3 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         right -= 1
 
     return txt[:left] + sep + txt[right+1:]
-
-
-if util.WINDOWS:
-    ANSI = os.environ.get("TERM") == "ANSI"
-    OFFSET = 1
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "* "
-    CHAR_ELLIPSIES = "..."
-else:
-    ANSI = True
-    OFFSET = 0
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "✔ "
-    CHAR_ELLIPSIES = "…"
