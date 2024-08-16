@@ -135,7 +135,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.sk/</td>
+    <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
@@ -178,7 +178,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -250,7 +250,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -285,7 +285,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Hentai Cosplay</td>
-    <td>https://hentai-cosplays.com/</td>
+    <td>https://hentai-cosplay-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
