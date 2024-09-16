@@ -516,6 +516,15 @@ class LazyPrompt():
         return getpass.getpass()
 
 
+class NullContext():
+
+    def __enter__(self):
+        return None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
@@ -580,6 +589,7 @@ class CustomNone():
     def __len__():
         return 0
 
+    __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
@@ -759,8 +769,9 @@ def build_extractor_filter(categories, negate=True, special=None):
     if catsub:
         def test(extr):
             for category, subcategory in catsub:
-                if category in (extr.category, extr.basecategory) and \
-                        subcategory == extr.subcategory:
+                if subcategory == extr.subcategory and (
+                        category == extr.category or
+                        category == extr.basecategory):
                     return not negate
             return negate
         tests.append(test)

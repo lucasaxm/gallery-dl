@@ -9,13 +9,21 @@
 """Extractors for https://bunkr.si/"""
 
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text
+from .. import text, config
 
-BASE_PATTERN = (
-    r"(?:bunkr:(?:https?://)?([^/?#]+)|"
-    r"(?:https?://)?(?:app\.)?(bunkr+"
-    r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]|black|cat|media|red|site|ws|org)))"
-)
+
+if config.get(("extractor", "bunkr"), "tlds"):
+    BASE_PATTERN = (
+        r"(?:bunkr:(?:https?://)?([^/?#]+)|"
+        r"(?:https?://)?(?:app\.)?(bunkr+\.\w+))"
+    )
+else:
+    BASE_PATTERN = (
+        r"(?:bunkr:(?:https?://)?([^/?#]+)|"
+        r"(?:https?://)?(?:app\.)?(bunkr+"
+        r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]"
+        r"|black|cat|media|red|site|ws|org)))"
+    )
 
 LEGACY_DOMAINS = {
     "bunkr.ru",
@@ -70,11 +78,16 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def _extract_file(self, url):
         page = self.request(url).text
-        return (
-            text.extr(page, '<source src="', '"') or
-            text.extr(page, '<img src="', '"') or
-            text.rextract(page, ' href="', '"', page.rindex("Download"))[0]
-        )
+        url = (text.extr(page, '<source src="', '"') or
+               text.extr(page, '<img src="', '"'))
+
+        if not url:
+            url_download = text.rextract(
+                page, ' href="', '"', page.rindex("Download"))[0]
+            page = self.request(text.unescape(url_download)).text
+            url = text.unescape(text.rextract(page, ' href="', '"')[0])
+
+        return url
 
     def _validate(self, response):
         if response.history and response.url.endswith("/maintenance-vid.mp4"):

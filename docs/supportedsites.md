@@ -104,6 +104,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Archive of Our Own</td>
+    <td>https://archiveofourown.org/</td>
+    <td>Search Results, Series, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td></td>
+</tr>
+<tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
@@ -149,6 +155,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Ci-en</td>
     <td>https://ci-en.net/</td>
     <td>Articles, Creators, Followed Users, Recent Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>cohost!</td>
+    <td>https://cohost.org/</td>
+    <td>Posts, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -790,7 +802,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
-    <td>Boards, Pins, User Pins, related Pins, Search Results</td>
+    <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -1460,61 +1472,61 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Wikimedia</td>
     <td>https://www.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikispecies</td>
     <td>https://species.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikimedia Commons</td>
     <td>https://commons.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>MediaWiki</td>
     <td>https://www.mediawiki.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Fandom</td>
     <td>https://www.fandom.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>wiki.gg</td>
     <td>https://www.wiki.gg/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Bulbapedia</td>
     <td>https://bulbapedia.bulbagarden.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>PidgiWiki</td>
     <td>https://www.pidgi.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Azur Lane Wiki</td>
     <td>https://azurlane.koumakan.jp/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 
