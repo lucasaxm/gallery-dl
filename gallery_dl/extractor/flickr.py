@@ -22,7 +22,7 @@ class FlickrExtractor(Extractor):
     archive_fmt = "{id}"
     cookies_domain = None
     request_interval = (1.0, 2.0)
-    request_interval_min = 0.2
+    request_interval_min = 0.5
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -40,8 +40,9 @@ class FlickrExtractor(Extractor):
                 photo = extract(photo)
             except Exception as exc:
                 self.log.warning(
-                    "Skipping %s (%s)", photo["id"], exc.__class__.__name__)
-                self.log.debug("", exc_info=True)
+                    "Skipping photo %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=exc)
             else:
                 photo.update(data)
                 url = photo["url"]
@@ -234,8 +235,8 @@ class FlickrAPI(oauth.OAuth1API):
     """
 
     API_URL = "https://api.flickr.com/services/rest/"
-    API_KEY = "f8f78d1a40debf471f0b22fa2d00525f"
-    API_SECRET = "4f9dae1113e45556"
+    API_KEY = "90c368449018a0cb880ea4889cbb8681"
+    API_SECRET = "e4b83e319c11e9e1"
     FORMATS = [
         ("o" , "Original"    , None),
         ("6k", "X-Large 6K"  , 6144),

@@ -1,5 +1,97 @@
 # Changelog
 
+## 1.27.6 - 2024-10-11
+### Extractors
+#### Additions
+- [ao3] add `subscriptions` extractor ([#6247](https://github.com/mikf/gallery-dl/issues/6247))
+- [boosty] add support ([#2387](https://github.com/mikf/gallery-dl/issues/2387))
+- [civitai] add `post` extractors ([#6279](https://github.com/mikf/gallery-dl/issues/6279))
+- [pixiv] support unlisted artworks ([#5162](https://github.com/mikf/gallery-dl/issues/5162))
+#### Fixes
+- [cohost] sanitize default filenames ([#6262](https://github.com/mikf/gallery-dl/issues/6262))
+  - limit `headline` length
+  - remove `plainTextBody`
+- [deviantart] fix & improve journal/literature extraction ([#6254](https://github.com/mikf/gallery-dl/issues/6254), [#6207](https://github.com/mikf/gallery-dl/issues/6207), [#6196](https://github.com/mikf/gallery-dl/issues/6196))
+  - extract journal HTML from webpage if possible
+  - support converting `tiptap` markup to HTML
+- [deviantart] fix `stash` folder extraction
+- [flickr] update default API credentials ([#6300](https://github.com/mikf/gallery-dl/issues/6300))
+- [flickr] fix `ZeroDivisionError` ([#6252](https://github.com/mikf/gallery-dl/issues/6252))
+- [imagefap] fix `{num}` in single image default filenames
+- [myhentaigallery] fix `tags` extraction
+- [patreon] extract `attachments_media` files ([#6241](https://github.com/mikf/gallery-dl/issues/6241), [#6268](https://github.com/mikf/gallery-dl/issues/6268))
+- [pixiv] implement workaround for `limit_sanity_level` works ([#4327](https://github.com/mikf/gallery-dl/issues/4327), [#4747](https://github.com/mikf/gallery-dl/issues/4747), [#5054](https://github.com/mikf/gallery-dl/issues/5054), [#5435](https://github.com/mikf/gallery-dl/issues/5435), [#5651](https://github.com/mikf/gallery-dl/issues/5651), [#5655](https://github.com/mikf/gallery-dl/issues/5655))
+- [pornhub] fix `KeyError` when album images are missing ([#6299](https://github.com/mikf/gallery-dl/issues/6299))
+- [rule34us] fix extraction ([#6289](https://github.com/mikf/gallery-dl/issues/6289))
+- [8chan] set TOS cookie for current and previous day
+#### Improvements
+- [bunkr] support `bunkr.pk` URLs ([#6272](https://github.com/mikf/gallery-dl/issues/6272))
+- [civitai] use tRPC API by default ([#6279](https://github.com/mikf/gallery-dl/issues/6279))
+- [civitai] improve default archive format ([#6302](https://github.com/mikf/gallery-dl/issues/6302))
+- [komikcast] update domain to `komikcast.cz`
+- [newgrounds] detect more comment embeds ([#6253](https://github.com/mikf/gallery-dl/issues/6253))
+- [newgrounds] add more fallback URL formats for `art-images` files
+- [oauth] prevent empty browser names
+- [patreon] use mobile UA ([#6241](https://github.com/mikf/gallery-dl/issues/6241), [#6239](https://github.com/mikf/gallery-dl/issues/6239), [#6140](https://github.com/mikf/gallery-dl/issues/6140))
+- [patreon] handle suspended accounts
+- [pixiv] detect works requiring `My pixiv` access
+#### Metadata
+- [civitai] ensure image files have an `id` ([#6251](https://github.com/mikf/gallery-dl/issues/6251))
+- [gelbooru_v02] unescape HTML entities in categorized tags
+- [generic] ensure `path` metadata is always defined
+- [pixiv] retrieve `caption` from AJAX API when empty ([#4327](https://github.com/mikf/gallery-dl/issues/4327), [#5191](https://github.com/mikf/gallery-dl/issues/5191))
+#### Options
+- [fanbox] add `comments` option, extend `metadata` option ([#6287](https://github.com/mikf/gallery-dl/issues/6287))
+- [pixiv] add `comments` option ([#6287](https://github.com/mikf/gallery-dl/issues/6287))
+#### Removals
+- [blogger] remove `micmicidol.club`
+- [chevereto] remove `deltaporno.com`
+- [lolisafe] remove `xbunkr.com`
+- [pururin] remove module
+- [shimmie2] remove `loudbooru.com`
+### Post Processors
+- [ugoira] fix `BadZipFile` exceptions ([#6285](https://github.com/mikf/gallery-dl/issues/6285))
+- [ugoira] catch all exceptions when extracting ZIP archives ([#6285](https://github.com/mikf/gallery-dl/issues/6285))
+- [ugoira] forward frame data as `_ugoira_frame_data` ([#6154](https://github.com/mikf/gallery-dl/issues/6154), [#6285](https://github.com/mikf/gallery-dl/issues/6285))
+### Miscellaneous
+- [build] remove setuptools and requests version restrictions
+- [docker] build from `python:3.12-alpine`
+- [text] improve `parse_query()` performance
+
+## 1.27.5 - 2024-09-28
+### Extractors
+#### Additions
+- [ao3] add support ([#6013](https://github.com/mikf/gallery-dl/issues/6013))
+- [civitai] add support ([#3706](https://github.com/mikf/gallery-dl/issues/3706), [#3787](https://github.com/mikf/gallery-dl/issues/3787), [#4129](https://github.com/mikf/gallery-dl/issues/4129), [#5995](https://github.com/mikf/gallery-dl/issues/5995), [#6220](https://github.com/mikf/gallery-dl/issues/6220))
+- [cohost] add support ([#4483](https://github.com/mikf/gallery-dl/issues/4483), [#6191](https://github.com/mikf/gallery-dl/issues/6191))
+#### Fixes
+- [8chan] update `TOS` cookie name
+- [deviantart] work around OAuth API returning empty journal texts ([#6196](https://github.com/mikf/gallery-dl/issues/6196), [#6207](https://github.com/mikf/gallery-dl/issues/6207), [#5916](https://github.com/mikf/gallery-dl/issues/5916))
+- [weasyl:favorite] fix pagination ([#6113](https://github.com/mikf/gallery-dl/issues/6113))
+#### Improvements
+- [bluesky] support video downloads ([#6183](https://github.com/mikf/gallery-dl/issues/6183))
+- [deviantart] add `previews` option ([#3782](https://github.com/mikf/gallery-dl/issues/3782), [#6124](https://github.com/mikf/gallery-dl/issues/6124))
+- [deviantart] warn about empty journal texts ([#5916](https://github.com/mikf/gallery-dl/issues/5916))
+- [inkbunny:favorite] update default directory ([#6115](https://github.com/mikf/gallery-dl/issues/6115))
+- [jpgfish] update domain to `jpg5.su` ([#6231](https://github.com/mikf/gallery-dl/issues/6231))
+- [skeb] prevent 429 errors and need for `request_key` cookie
+- [weasyl:favorite] support readable URL format ([#6113](https://github.com/mikf/gallery-dl/issues/6113))
+- [wikimedia] automatically detect API endpoint when none is defined
+- [zzup] support `up.zzup.com` galleries ([#6181](https://github.com/mikf/gallery-dl/issues/6181))
+### Post Processors
+- [ugoira] implement storing "original" frames in ZIP archives ([#6147](https://github.com/mikf/gallery-dl/issues/6147))
+- [ugoira] fix `KeyError: '_ugoira_frame_index'` ([#6154](https://github.com/mikf/gallery-dl/issues/6154))
+### Formatter
+- add `L` conversion - returns the length of a value
+- allow accessing `util.NONE` via global `_nul`
+### Miscellaneous
+- [cookies] add `cookies-select` option
+- [cookies:firefox] support using domain & container filters together
+- [docker] prevent errors in Dockerfile build
+- [tests] make `#category` result entries optional
+- allow filtering `--list-extractors` results
+- implement alternatives for deprecated `utc` datetime functions
+
 ## 1.27.4 - 2024-09-06
 ### Extractors
 #### Additions

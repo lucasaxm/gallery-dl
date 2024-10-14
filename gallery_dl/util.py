@@ -218,16 +218,32 @@ def to_string(value):
 
 
 def datetime_to_timestamp(dt):
-    """Convert naive UTC datetime to timestamp"""
+    """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
 
 
 def datetime_to_timestamp_string(dt):
-    """Convert naive UTC datetime to timestamp string"""
+    """Convert naive UTC datetime to Unix timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:
         return ""
+
+
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
+    datetime_utcnow = datetime.datetime.utcnow
+    datetime_from_timestamp = datetime_utcfromtimestamp
+else:
+    # Python >= 3.12
+    def datetime_from_timestamp(ts=None):
+        """Convert Unix timestamp to naive UTC datetime"""
+        Y, m, d, H, M, S, _, _, _ = time.gmtime(ts)
+        return datetime.datetime(Y, m, d, H, M, S)
+
+    datetime_utcfromtimestamp = datetime_from_timestamp
+    datetime_utcnow = datetime_from_timestamp
 
 
 def json_default(obj):
@@ -237,7 +253,11 @@ def json_default(obj):
 
 
 json_loads = json._default_decoder.decode
-json_dumps = json.JSONEncoder(default=json_default).encode
+json_dumps = json.JSONEncoder(
+    check_circular=False,
+    separators=(",", ":"),
+    default=json_default,
+).encode
 
 
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
@@ -383,9 +403,9 @@ def set_mtime(path, mtime):
         pass
 
 
-def cookiestxt_load(fp, cookiejar):
-    """Parse a Netscape cookies.txt file and add its Cookies to 'cookiejar'"""
-    set_cookie = cookiejar.set_cookie
+def cookiestxt_load(fp):
+    """Parse a Netscape cookies.txt file and add return its Cookies"""
+    cookies = []
 
     for line in fp:
 
@@ -407,7 +427,7 @@ def cookiestxt_load(fp, cookiejar):
             name = value
             value = None
 
-        set_cookie(Cookie(
+        cookies.append(Cookie(
             0, name, value,
             None, False,
             domain,
@@ -418,6 +438,8 @@ def cookiestxt_load(fp, cookiejar):
             None if expires == "0" or not expires else expires,
             False, None, None, {},
         ))
+
+    return cookies
 
 
 def cookiestxt_store(fp, cookies):

@@ -58,6 +58,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bunkr.ps/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.pk/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
     "#url"     : "https://bunkr.ax/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,

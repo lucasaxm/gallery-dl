@@ -19,8 +19,7 @@ class CohostExtractor(Extractor):
     category = "cohost"
     root = "https://cohost.org"
     directory_fmt = ("{category}", "{postingProject[handle]}")
-    filename_fmt = ("{postId}_{headline|plainTextBody:?/_/[:100]}"
-                    "{num}.{extension}")
+    filename_fmt = ("{postId}_{headline:?/_/[b:200]}{num}.{extension}")
     archive_fmt = "{postId}_{num}"
 
     def _init(self):
@@ -180,6 +179,36 @@ class CohostTagExtractor(CohostExtractor):
 
             try:
                 feed = data[post_feed_key]
+            except KeyError:
+                feed = data.popitem()[1]
+
+            yield from feed["posts"]
+
+            pagination = feed["paginationMode"]
+            if not pagination.get("morePagesForward"):
+                return
+            params["refTimestamp"] = pagination["refTimestamp"]
+            params["skipPosts"] = \
+                pagination["currentSkip"] + pagination["idealPageStride"]
+
+
+class CohostLikesExtractor(CohostExtractor):
+    """Extractor for liked posts"""
+    subcategory = "likes"
+    pattern = BASE_PATTERN + r"/rc/liked-posts"
+    example = "https://cohost.org/rc/liked-posts"
+
+    def posts(self):
+        url = "{}/rc/liked-posts".format(self.root)
+        params = {}
+
+        while True:
+            page = self.request(url, params=params).text
+            data = util.json_loads(text.extr(
+                page, 'id="__COHOST_LOADER_STATE__">', '</script>'))
+
+            try:
+                feed = data["liked-posts-feed"]
             except KeyError:
                 feed = data.popitem()[1]
 

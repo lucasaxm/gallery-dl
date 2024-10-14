@@ -383,6 +383,7 @@ Type
     |Duration|_
 Default
     * ``"0.5-1.5"``
+        ``ao3``, ``civitai``,
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
         ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
@@ -415,14 +416,10 @@ Description
     The username and password to use when attempting to log in to
     another site.
 
-    Specifying username and password is required for
-
-    * ``nijie``
-    * ``horne``
-
-    and optional for
+    This is supported for
 
     * ``aibooru`` (*)
+    * ``ao3``
     * ``aryion``
     * ``atfbooru`` (*)
     * ``bluesky``
@@ -434,6 +431,7 @@ Description
     * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``horne`` (R)
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -441,8 +439,11 @@ Description
     * ``koharu``
     * ``mangadex``
     * ``mangoxo``
+    * ``newgrounds``
+    * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``seiga``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
@@ -457,6 +458,9 @@ Description
     (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
 
+    (R) Login with username & password or supplying logged-in
+    `cookies <extractor.*.cookies_>`__ is required
+
     Note: Leave the ``password`` value empty or undefined
     to be prompted for a passeword when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
@@ -467,7 +471,7 @@ extractor.*.input
 Type
     ``bool``
 Default
-    ``true`` if `stdin` is attached to a terminal ,
+    ``true`` if `stdin` is attached to a terminal,
     ``false`` otherwise
 Description
     Allow prompting the user for interactive input.
@@ -513,14 +517,37 @@ Description
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
-      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
-      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains. Has no effect when also specifying a container.
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container (default))
+      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains.
 
       .. code:: json
 
         ["firefox"]
         ["firefox", null, null, "Personal"]
         ["chromium", "Private", "kwallet", null, ".twitter.com"]
+
+
+extractor.*.cookies-select
+--------------------------
+Type
+    ``string``
+Default
+    ``"random"``
+Description
+    Interpret `extractor.cookies <extractor.*.cookies_>`__
+    as a list of cookie sources and select one of them for each extractor run.
+
+    * ``"random"``: Select cookies `randomly <https://docs.python.org/3.10/library/random.html#random.choice>`__
+    * ``"rotate"``: Select cookies in sequence. Start over from the beginning after reaching the end of the list.
+
+    .. code:: json
+
+      [
+          "~/.local/share/cookies-instagram-com-1.txt",
+          "~/.local/share/cookies-instagram-com-2.txt",
+          "~/.local/share/cookies-instagram-com-3.txt",
+          ["firefox", null, null, "c1", ".instagram-com"],
+      ]
 
 
 extractor.*.cookies-update
@@ -600,7 +627,7 @@ Description
     and use the User-Agent used by the system's default browser.
 
     Note: This option has no effect on
-    `pixiv`, `e621`, and `mangadex`
+    `pixiv`, `e621`, `mangadex`, and `patreon`
     extractors, as these need specific values to function correctly.
 
 
@@ -609,7 +636,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``mangasee``, ``patreon``, ``pixiv:series``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``mangasee``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
@@ -685,7 +712,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``, ``patreon``, ``pixiv:series``
+    * ``false``: ``artstation``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
@@ -1481,6 +1508,54 @@ Description
     Download videos.
 
 
+extractor.boosty.allowed
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Request only available posts.
+
+
+extractor.boosty.bought
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Request only purchased posts for ``feed`` results.
+
+
+extractor.boosty.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide detailed ``user`` metadata.
+
+
+extractor.boosty.videos
+-----------------------
+Type
+    * ``bool``
+    * ``list`` of ``strings``
+Default
+    ``true``
+Example
+    ``["full_hd", "high", "medium"]``
+Description
+    Download videos.
+
+    | If this is a ``list``, it selects which format to try to download.
+    | Possibly available formats are
+      ``"quad_hd"``, ``"ultra_hd"``, ``"full_hd"``,
+      ``"high"``, ``"medium"``, ``"low"``
+
+
 extractor.bunkr.tlds
 --------------------
 Type
@@ -1501,13 +1576,117 @@ Type
 Default
     ``["image", "video", "download", "gallery"]``
 Description
-    Determines the type and order of files to be downloaded.
+    Determines the type and order of files to download.
 
     Available types are
     ``image``,
     ``video``,
     ``download``,
     ``gallery``.
+
+
+extractor.civitai.api
+---------------------
+Type
+    ``string``
+Default
+    ``"trpc"``
+Description
+    Selects which API endpoints to use.
+
+    * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
+    * ``"trpc"``: Internal tRPC API
+
+
+extractor.civitai.api-key
+-------------------------
+Type
+    ``string``
+Description
+    The API Key value generated in your
+    `User Account Settings <https://civitai.com/user/account>`__
+    to make authorized API requests.
+
+    See `API/Authorization <https://developer.civitai.com/docs/api/public-rest#authorization>`__
+    for details.
+
+
+extractor.civitai.files
+-----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image"]``
+Description
+    Determines the type and order of files to download when processing models.
+
+    Available types are
+    ``model``,
+    ``image``,
+    ``gallery``.
+
+
+extractor.civitai.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["user-models", "user-posts"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"user-models"``,
+    ``"user-posts"``,
+    ``"user-images"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.civitai.nsfw
+----------------------
+Type
+    * ``bool``
+    * ``string`` (``"api": "rest"``)
+    * ``integer`` (``"api": "trpc"``)
+Default
+    ``true``
+Description
+    Download images rated NSFW.
+
+    * For ``"api": "rest"``, this can be one of
+      ``"None"``, ``"Soft"``, ``"Mature"``, ``"X"``
+      to set the highest returned mature content flag.
+
+    * For ``"api": "trpc"``, this can be an ``integer``
+      whose bits select the returned mature content flags.
+
+      For example, ``12`` (``4|8``)  would return only
+      ``Mature`` and ``X`` rated images,
+      while ``3`` (``1|2``) would return only
+      ``None`` and ``Soft`` rated images,
+
+
+extractor.civitai.quality
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"original=true"``
+Example
+    * ``"width=1280,quality=90"``
+    * ``["width=1280", "quality=90"]``
+Description
+    A (comma-separated) list of image quality options
+    to pass with every image URL.
+
+    Known available options include ``original``, ``quality``, ``width``
+
+    Note: Set this option to an arbitrary letter, e.g., ``"w"``,
+    to download images in JPEG format at their original resolution.
 
 
 extractor.cohost.asks
@@ -1901,7 +2080,7 @@ Description
 
     Setting this option to ``"images"`` only downloads original
     files if they are images and falls back to preview versions for
-    everything else (archives, etc.).
+    everything else (archives, videos, etc.).
 
 
 extractor.deviantart.pagination
@@ -1915,6 +2094,19 @@ Description
 
     * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+
+
+extractor.deviantart.previews
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For non-image files (archives, videos, etc.),
+    also download the file's preview image.
+
+    Set this option to ``"all"`` to download previews for all files.
 
 
 extractor.deviantart.public
@@ -2120,6 +2312,19 @@ Description
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
+extractor.fanbox.comments
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
@@ -2146,10 +2351,19 @@ Type
 Default
     ``false``
 Example
-    * ``user,plan``
-    * ``["user", "plan"]``
+    * ``user,plan,comments``
+    * ``["user", "plan", "comments"]``
 Description
     Extract ``plan`` and extended ``user`` metadata.
+
+    Supported fields when selecting which data to extract are
+
+    * ``comments``
+    * ``plan``
+    * ``user``
+
+    Note: ``comments`` can also be enabled via
+    `fanbox.comments <extractor.fanbox.comments_>`__
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -3292,7 +3506,20 @@ Description
     `your own account <extractor.pixiv.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
 
-    Note: This requires 1 additional API call per bookmarked post.
+    Note: This requires 1 additional API request per bookmarked post.
+
+
+extractor.pixiv.comments
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
 
 
 extractor.pixiv.work.related
@@ -3350,6 +3577,16 @@ Default
 Description
     When downloading galleries, this sets the maximum number of posts to get.
     A value of ``0`` means no limit.
+
+
+extractor.pixiv.sanity
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Try to fetch ``limit_sanity_level`` works via web API.
 
 
 extractor.plurk.comments

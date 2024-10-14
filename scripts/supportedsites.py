@@ -194,6 +194,16 @@ SUBCATEGORY_MAP = {
     "bluesky": {
         "posts": "",
     },
+    "boosty": {
+        "feed": "Subscriptions Feed",
+    },
+    "civitai": {
+        "tag-models": "Tag Searches (Models)",
+        "tag-images": "Tag Searches (Images)",
+        "user-models": "User Models",
+        "user-images": "User Images",
+        "user-posts": "User Posts",
+    },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
@@ -264,6 +274,7 @@ SUBCATEGORY_MAP = {
         "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
+        "unlisted": "Unlisted Works",
         "work": "individual Images",
     },
     "poringa": {
@@ -366,11 +377,13 @@ _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
+    "ao3"            : "Supported",
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
+    "boosty"         : _COOKIES,
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
@@ -404,7 +417,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
-    "seiga"          : _COOKIES,
+    "seiga"          : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",

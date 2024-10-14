@@ -205,9 +205,8 @@ class TestCookiesTxt(unittest.TestCase):
     def test_cookiestxt_load(self):
 
         def _assert(content, expected):
-            jar = http.cookiejar.CookieJar()
-            util.cookiestxt_load(io.StringIO(content, None), jar)
-            for c, e in zip(jar, expected):
+            cookies = util.cookiestxt_load(io.StringIO(content, None))
+            for c, e in zip(cookies, expected):
                 self.assertEqual(c.__dict__, e.__dict__)
 
         _assert("", [])
@@ -253,8 +252,7 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname",
-                                 http.cookiejar.CookieJar())
+            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname")
 
     def test_cookiestxt_store(self):
 
@@ -737,6 +735,22 @@ def hash(value):
         self.assertEqual(f(util.EPOCH), "0")
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")
+
+    def test_datetime_from_timestamp(
+            self, f=util.datetime_from_timestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+        self.assertEqual(f(1262304000.128000).replace(microsecond=0),
+                         datetime.datetime(2010, 1, 1, 0, 0, 0))
+
+    def test_datetime_utcfromtimestamp(
+            self, f=util.datetime_utcfromtimestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+
+    def test_datetime_utcnow(
+            self, f=util.datetime_utcnow):
+        self.assertIsInstance(f(), datetime.datetime)
 
     def test_universal_none(self):
         obj = util.NONE
